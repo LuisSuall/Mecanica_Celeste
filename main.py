@@ -22,13 +22,35 @@ class Planet:
 		return current_u
 
 	def position(self, t):
-		return np.multiply(self.a,(np.cos(self.u(t)) - self.epsilon,np.sqrt(1- self.epsilon ** 2) * np.sin(self.u(t))))
+		return np.multiply(self.a,(np.cos(self.u(t)) - self.epsilon , np.sqrt(1- self.epsilon ** 2) * np.sin(self.u(t))))
+
+	def energy(self, t):
+		mu = (4 * np.pi**2 * self.a**3)/ (self.period**2)
+
+		return (mu *(-1 + self.epsilon* np.cos(self.u(t)))) / (2* self.a*(1-self.epsilon*np.cos(self.u(t))))
+
+	def angular_momentum(self, t):
+		return (0,0,1 - self.epsilon* np.cos(self.u(t)))
+
 
 def main():
 
 	earth = Planet(1, 0.017, 1,0,0.0001)
 
-	time_samples = np.arange(0,1,0.001)
+	t = 0
+
+	while (t != -1):
+		t = input("Set time: ")
+
+		t = float(t)
+
+		print("Energy: " +  str(earth.energy(t)))
+		print("Anguar momentum: " +  str(earth.angular(t)))
+		print("Eccentric anomaly: " + str(earth.u(t)))
+
+		time_samples = np.arange(0,1,0.001)
+
+	#Draw orbit
 
 	points = [earth.position(time) for time in time_samples]
 
