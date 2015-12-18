@@ -97,11 +97,13 @@ class Planet:
 		self.initial_time = initial_time
 		self.precision = precision
 		self.mu = (4 * np.pi**2 * self.a**3)/ (self.period**2)
+		self.bb = self.a * np.sqrt(1 - self.epsilon **2)
 
 		self.r = r
 		self.g = g
 		self.b = b
 		self.radius = radius
+
 
 	def u(self, t):
 		current_u = np.pi
@@ -111,9 +113,19 @@ class Planet:
 
 		while (np.abs(current_u - last_u) > self.precision):
 			last_u = current_u
-			current_u = (self.epsilon * (np.sin(current_u) - current_u * np.cos(current_u))+ xi) / (1 - self.epsilon * np.cos(current_u))
+			current_u = (self.epsilon * (np.sin(last_u) - current_u * np.cos(last_u))+ xi) / (1 - self.epsilon * np.cos(last_u))
 
-		return current_u
+		#np.modf(current_u/(2 * np.pi),current_u)
+		return current_u#*(2 * np.pi)
+
+	def u_norm(self,t):
+		u = self.u(t)
+		u = np.modf(u/(2 * np.pi))[0]
+
+		return u * (2 * np.pi)
+
+	def t(self,u):
+		return self.period/(2*np.pi) * (u - self.epsilon * np.sin(u)) + self.initial_time
 
 	def du(self, t):
 		return np.sqrt(self.mu) / (self.a ** (3/2) * (1 - self.epsilon* np.cos(self.u(t))))
@@ -138,8 +150,6 @@ def main():
 		reader = csv.DictReader(csvfile)
 
 		for row in reader:
-			print(row['name'])
-			print('RGB: '+ row['r']+' '+ row['g'] + ' ' + row['b'])
 			planets.append(Planet(row['name'],float(row['a']), float(row['epsilon']), float(row['period']), float(row['initial_time']), 0.0001,
 								  float(row['r']),float(row['g']),float(row['b']),float(row['radius'])))
 
@@ -148,30 +158,21 @@ def main():
 
 	app = Application(planets, master=root)
 	app.mainloop()
-	#t = 0
 
-	#while (t != -1):
-	#	t = input("Set time: ")
 
-	#	t = float(t)
+	i = input("Elige el planeta:\n0-Mercurio,1-Venus,2-Tierra,3-Marte,4-Jupiter,5-Saturno,6-Urano,7-Neptuno\n")
+	i = int(i)
+	print("nombre: " + str(planets[i].name))
+	print("a: " + str(planets[i].a))
+	print("b: " + str(planets[i].bb))
+	print("eps: " + str(planets[i].epsilon))
+	print("periodo: " + str(planets[i].period))
+	print("T0: " + str(planets[i].initial_time))
+	t = input("Introduce un tiempo: ")
+	print("u: " + str(planets[i].u_norm(float(t))))
+	print("t(dado u anterior): " + str(planets[i].t(planets[i].u(float(t)))))
 
-	#	for planet in planets:
-	#		print(planet.name)
-	#		print("Energy: " +  str(planet.energy(t)))
-	#		print("Anguar momentum: " +  str(planet.angular_momentum(t)))
-	#		print("Eccentric anomaly: " + str(planet.u(t)))
 
-	#time_samples = np.arange(0,1,0.001)
-
-	#Draw orbit
-
-	#points = [earth.position(time) for time in time_samples]
-
-	#x = [point[0] for point in points]
-	#y = [point[1] for point in points]
-
-	#plt.plot(x,y)
-	#plt.show()
 
 if __name__ == '__main__':
 	main()
